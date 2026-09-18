@@ -47,8 +47,9 @@
     // Game constants
     const PLAYER_RADIUS = 12;
     const ENEMY_RADIUS = 18;
-    const MOVE_SPEED = 3;
-    const AI_INTERVAL = 400; // ms between AI moves
+    const PLAYER_SPEED = 2;
+    const ENEMY_SPEED = 3;
+    const AI_INTERVAL = 200; // ms between AI moves
 
     // Game state
     let player = { x: 60, y: canvas.height / 2 };
@@ -120,16 +121,16 @@
 
       switch (move) {
         case 'up':
-          enemy.y -= MOVE_SPEED * (dy < 0 ? 1 : 0.5);
+          enemy.y -= ENEMY_SPEED * (dy < 0 ? 1 : 0.5);
           break;
         case 'down':
-          enemy.y += MOVE_SPEED * (dy > 0 ? 1 : 0.5);
+          enemy.y += ENEMY_SPEED * (dy > 0 ? 1 : 0.5);
           break;
         case 'left':
-          enemy.x -= MOVE_SPEED * (dx < 0 ? 1 : 0.5);
+          enemy.x -= ENEMY_SPEED * (dx < 0 ? 1 : 0.5);
           break;
         case 'right':
-          enemy.x += MOVE_SPEED * (dx > 0 ? 1 : 0.5);
+          enemy.x += ENEMY_SPEED * (dx > 0 ? 1 : 0.5);
           break;
       }
     }
@@ -137,10 +138,10 @@
     function updatePlayer() {
       if (!isRunning || isGameOver) return;
 
-      if (keys['ArrowUp']) player.y -= MOVE_SPEED;
-      if (keys['ArrowDown']) player.y += MOVE_SPEED;
-      if (keys['ArrowLeft']) player.x -= MOVE_SPEED;
-      if (keys['ArrowRight']) player.x += MOVE_SPEED;
+      if (keys['ArrowUp']) player.y -= PLAYER_SPEED;
+      if (keys['ArrowDown']) player.y += PLAYER_SPEED;
+      if (keys['ArrowLeft']) player.x -= PLAYER_SPEED;
+      if (keys['ArrowRight']) player.x += PLAYER_SPEED;
 
       // Keep player in bounds
       player.x = Math.max(PLAYER_RADIUS, Math.min(canvas.width - PLAYER_RADIUS, player.x));
