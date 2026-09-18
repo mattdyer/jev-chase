@@ -48,8 +48,8 @@
     const PLAYER_RADIUS = 12;
     const ENEMY_RADIUS = 18;
     const PLAYER_SPEED = 2;
-    const ENEMY_SPEED = 3;
-    const AI_INTERVAL = 200; // ms between AI moves
+    const ENEMY_SPEED = 2;
+    const AI_INTERVAL = 400; // ms between AI moves
 
     // Game state
     let player = { x: 60, y: canvas.height / 2 };
@@ -57,6 +57,7 @@
     let isRunning = false;
     let isGameOver = false;
     let lastAiMove = 0;
+    let move = { up: 0, down: 0, left: 0, right: 0 };
 
     // Player movement
     const keys = {};
@@ -94,14 +95,14 @@
         });
         if (!response.ok) throw new Error('API call failed');
         const data = await response.json();
-        return data.move;
+        return data.probabilities; // Expected format: { up: 0.1, down: 0.2, left: 0.3, right: 0.4 }
       } catch (error) {
         console.error('Error getting enemy move:', error);
         // Fallback: simple tracking
-        if (enemy.x < player.x) return 'right';
-        if (enemy.x > player.x) return 'left';
-        if (enemy.y < player.y) return 'down';
-        return 'up';
+        if (enemy.x < player.x) return {'right': 1, 'left': 0, 'up': 0, 'down': 0};
+        if (enemy.x > player.x) return {'left': 1, 'right': 0, 'up': 0, 'down': 0};
+        if (enemy.y < player.y) return {'down': 1, 'up': 0, 'left': 0, 'right': 0};
+        return {'up': 1, 'down': 0, 'left': 0, 'right': 0};
       }
     }
 
@@ -109,17 +110,26 @@
       if (!isRunning || isGameOver) return;
 
       const now = Date.now();
-      if (now - lastAiMove < AI_INTERVAL) return;
-      lastAiMove = now;
-
-      const move = await getEnemyMove();
+      if (now - lastAiMove > AI_INTERVAL){
+        lastAiMove = now;  
+        move = await getEnemyMove();
+      };
+      
+      const startX = enemy.x;
+      const startY = enemy.y;
+      
       const dx = player.x - enemy.x;
       const dy = player.y - enemy.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist === 0) return;
 
-      switch (move) {
+      enemy.y -= (ENEMY_SPEED) * move.up;
+      enemy.y += (ENEMY_SPEED) * move.down;
+      enemy.x -= (ENEMY_SPEED) * move.left;
+      enemy.x += (ENEMY_SPEED) * move.right;
+
+      /*switch (move) {
         case 'up':
           enemy.y -= ENEMY_SPEED * (dy < 0 ? 1 : 0.5);
           break;
@@ -132,7 +142,17 @@
         case 'right':
           enemy.x += ENEMY_SPEED * (dx > 0 ? 1 : 0.5);
           break;
+      }*/
+
+      const newDx = player.x - enemy.x;
+      const newDy = player.y - enemy.y;
+      const newDist = Math.sqrt(newDx * newDx + newDy * newDy);
+
+      if (newDist > dist) {
+        enemy.x = startX;
+        enemy.y = startY;
       }
+
     }
 
     function updatePlayer() {
